@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>aoDOI</title>
+  <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+<body>
+<!--  On prend comme exemple un chercheur de l'Université de Nice Sophia Antipolis, mais le code est adaptable à condition de disposer d'un identifiant Hal, d'un ppn Idref et d'une uri data.bnf -->
+ <div class="header">
+  <h3>Jocelyne Streiff-Fenart</h3>
+  <div class="btn-group btn-group-justified" role="group">
+  <div class="btn-group" role="group">
+    <button type="button" id="buttonHal" class="btn btn-primary">Publications dans Hal</button>
+  </div>
+    <div class="btn-group" role="group">
+    <button type="button" id="buttonIdref" class="btn btn-primary">Documents dans le Sudoc</button>
+  </div>
+  <div class="btn-group" role="group">
+    <button type="buttonBnf" id="buttonBnf" class="btn btn-primary">Documents dans data.bnf</button>
+  </div>
+
+</div>
+</div>
+	<div class="container-fluid">
+      <!-- Example row of columns -->
+      <div class="row">
+       <div class="col-lg-4"> 
+		<div id="results-oa-box"></div>
+	</div>
+	 <div class="col-lg-4"> 
+		<div id="results-idref-box"></div>
+	</div>
+		 <div class="col-lg-4"> 
+		<div id="results-bnf-box"></div>
+	</div>
+</div>
+</div>
+
+<script>
+	$("#buttonHal").click(function() {
+   var hal = 'https://api.archives-ouvertes.fr/search/?wt=json&q=authIdHal_s:jocelyne-streiff-fenart&fl=*_s';
+		$('#hal').val('');
+		$.ajax({
+			url : hal,
+			type : 'GET',
+			dataType:'json',
+			success : function(data) {
+								result=data;
+                $('#results-oa-box').append('<p style="padding-top:10px">Hal</p>');
+				for(var i =0;i <= result.response.numFound;i++)
+{
+						$('#results-oa-box').append('<p style="padding-top:10px">'+result.response.docs[i].title_s+'</p>');
+						$('#results-oa-box').append('<ul class="list-group">');
+            	$('#results-oa-box').append('<li class="list-group-item list-group-item-info">Auteurs : '+result.response.docs[i].authFullName_s+'</li>');
+            	$('#results-oa-box').append('<li class="list-group-item list-group-item-info">Date : '+result.response.docs[i].producedDate_s+'</li>');
+            	$('#results-oa-box').append('<li class="list-group-item list-group-item-info">Keywords : '+result.response.docs[i].fr_keyword_s+'</li>');
+            	$('#results-oa-box').append('<li class="list-group-item list-group-item-info">Type de doc : '+result.response.docs[i].docType_s+'</li>');
+            	$('#results-oa-box').append('<li class="list-group-item list-group-item-info">Type de donnees : '+result.response.docs[i].submitType_s+'</li>');
+            	$('#results-oa-box').append('<li class="list-group-item list-group-item-info">url : <a href="'+result.response.docs[i].uri_s+'" target="_blanck">'+result.response.docs[i].uri_s+'</a></li>');
+            	if (typeof result.response.docs[i].fileMain_s !== 'undefined') {
+    	$('#results-oa-box').append('<li class="list-group-item list-group-item-info">Acces au fichier : '+result.response.docs[i].fileMain_s+'</li>');}
+            	if (typeof result.response.docs[i].journalSherpaColor_s !== 'undefined') {
+            		if (result.response.docs[i].journalSherpaColor_s == 'gray') {
+    	$('#results-oa-box').append('<li class="list-group-item list-group-item-info">Couleur SherpaRomeo <button type="button" class="btn btn-default">'+result.response.docs[i].journalSherpaColor_s+'</button></li>');}
+      if (result.response.docs[i].journalSherpaColor_s == 'green') {
+      $('#results-oa-box').append('<li class="list-group-item list-group-item-info">Couleur SherpaRomeo <button type="button" class="btn btn-success">'+result.response.docs[i].journalSherpaColor_s+'</button></li>');}
+     if (result.response.docs[i].journalSherpaColor_s == 'blue') {
+      $('#results-oa-box').append('<li class="list-group-item list-group-item-info">Couleur SherpaRomeo <button type="button" class="btn btn-primary">'+result.response.docs[i].journalSherpaColor_s+'</button></li>');}
+     if (result.response.docs[i].journalSherpaColor_s == 'yellow') {
+      $('#results-oa-box').append('<li class="list-group-item list-group-item-info">Couleur SherpaRomeo <button type="button" class="btn btn-warning">'+result.response.docs[i].journalSherpaColor_s+'</button></li>');}}
+    	if (typeof result.response.docs[i].doiId_s !== 'undefined') {
+    	$('#results-oa-box').append('<li class="list-group-item list-group-item-info">DOI : '+result.response.docs[i].doiId_s+'</li>');}
+    	$('#results-oa-box').append('</ul>');}	
+			}
+		});
+	});	
+
+$("#buttonIdref").click(function() {
+   var idref = 'http://www.idref.fr/services/biblio/029828783.xml';
+    $.ajax({
+      url : idref,
+      type : 'GET',
+      dataType:'xml',
+      success : function(xml) {
+      $('#results-idref-box').append('<p style="padding-top:10px">Sudoc</p>');
+ $(xml).find('doc').each(function()
+    {var citation = $(this).find('citation').text();
+      $('#results-idref-box').append('<p style="padding-top:10px">'+citation+'</p>');
+    });
+
+      }
+    }); 
+});
+
+		$("#buttonBnf").click(function() {
+		$.getJSON("http://data.bnf.fr/sparql?default-graph-uri=&query=PREFIX+rdarelationships%3A+%3Chttp%3A%2F%2Frdvocab.info%2FRDARelationshipsWEMI%2F%3E%0D%0Aselect+distinct%28%3Fz%29+%3Ftitle+%3Fdate+where+%7B%3Fy+%3Fp+%3Chttp%3A%2F%2Fdata.bnf.fr%2Fark%3A%2F12148%2Fcb12137299c%23about%3E.%0D%0A%3Fz+rdarelationships%3AexpressionManifested+%3Fy.%0D%0A%3Fz+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Ftitle%3E+%3Ftitle.%0D%0A++%3Fz+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate%3E+%3Fdate%7D&format=application%2Fsparql-results%2Bjson&timeout=0&should-sponge=&debug=on",
+   function (data) {
+     result = data ;
+      $('#results-bnf-box').append('<p style="padding-top:10px">DataBnf</p>');
+     				for(var i =0;i <= result.results.bindings.length;i++)
+{
+						$('#results-bnf-box').append('<p style="padding-top:10px">'+result.results.bindings[i].title.value+'</p>');
+						$('#results-bnf-box').append('<ul class="list-group">');
+						$('#results-bnf-box').append('<li class="list-group-item list-group-item-info">Date : '+result.results.bindings[i].date.value+'</li>');
+						$('#results-bnf-box').append('<li class="list-group-item list-group-item-info">uri : <a href="'+result.results.bindings[i].z.value+'" target="_blanck">'+result.results.bindings[i].z.value+'</a></li>');
+						$('#results-bnf-box').append('</ul>');}
+            } );      
+  }); 
+</script>
+</body>
+</html>
