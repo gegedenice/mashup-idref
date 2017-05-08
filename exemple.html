@@ -41,7 +41,6 @@
 <script>
 	$("#buttonHal").click(function() {
    var hal = 'https://api.archives-ouvertes.fr/search/?wt=json&q=authIdHal_s:jocelyne-streiff-fenart&fl=*_s';
-		$('#hal').val('');
 		$.ajax({
 			url : hal,
 			type : 'GET',
