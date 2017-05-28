@@ -1,0 +1,90 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.css">
+      <style type="text/css">
+        #mynetwork {
+            width: 1100px;
+            height: 350px;
+            border: 1px solid lightgray;
+        }
+    </style>
+    </head>
+    <body>
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+    // create an array with nodes
+    var nodes = new vis.DataSet([
+        {id: 1, label: 'Idref', url: 'http://www.idref.fr/052724301', color: {background:'cyan', border:'blue',highlight:{background:'red',border:'blue'},hover:{background:'white',border:'red'}}},
+        {id: 2, label: 'Hal', url: 'https://hal-unice.archives-ouvertes.fr/search/index/q/authIdHal_s%3A%22damon-mayaffre%22/', color: {background:'cyan', border:'blue',highlight:{background:'red',border:'blue'},hover:{background:'white',border:'red'}}},
+        {id: 3, label: 'data.bnf', url: 'http://data.bnf.fr/13626827/damon_mayaffre/', color: {background:'cyan', border:'blue',highlight:{background:'red',border:'blue'},hover:{background:'white',border:'red'}}},
+        {id: 4, label: 'Viaf', url: 'http://viaf.org/viaf/71569553/', color: {background:'cyan', border:'blue',highlight:{background:'red',border:'blue'},hover:{background:'white',border:'red'}}},
+        {id: 5, label: 'ISNI', url: 'http://www.isni.org/isni/0000000116691473', color: {background:'cyan', border:'blue',highlight:{background:'red',border:'blue'},hover:{background:'white',border:'red'}}},
+        {id: 6, label: 'Wikipedia/DBpedia', url: 'https://fr.wikipedia.org/wiki/Damon_Mayaffre', color: {background:'cyan', border:'blue',highlight:{background:'red',border:'blue'},hover:{background:'white',border:'red'}}},
+        {id: 7, label: 'Orcid', color: 'rgba(97,195,238,0.5)'},
+        {id: 8, label: 'Arxiv', color: 'rgba(97,195,238,0.5)'},
+        {id: 9, label: 'Wikidata', url: 'https://www.wikidata.org/wiki/Q15968368', color: {background:'cyan', border:'blue',highlight:{background:'red',border:'blue'},hover:{background:'white',border:'red'}}},
+        {id: 10, label: 'LC', url: 'http://id.loc.gov/authorities/names/nr2001006760.html', color: {background:'cyan', border:'blue',highlight:{background:'red',border:'blue'},hover:{background:'white',border:'red'}}},
+        {id: 11, label: 'ResearcherID', color: 'rgba(97,195,238,0.5)'},
+        {id: 12, label: 'Autres referentiels nationaux etrangers', color: 'rgba(97,195,238,0.5)'}
+
+    ]);
+
+    // create an array with edges
+    var edges = new vis.DataSet([
+        {from: 1, to: 2},
+        {from: 1, to: 3},
+        {from: 1, to: 4},
+        {from: 1, to: 5},
+        {from: 1, to: 6},
+        {from: 1, to: 7},
+        {from: 3, to: 1},
+        {from: 3, to: 4},
+        {from: 3, to: 5},
+        {from: 3, to: 6},
+        {from: 3, to: 9},
+        {from: 4, to: 5},
+        {from: 4, to: 1},
+        {from: 4, to: 3},
+        {from: 4, to: 10},
+        {from: 4, to: 12},
+        {from: 5, to: 1},
+        {from: 5, to: 3},
+        {from: 5, to: 6},
+        {from: 5, to: 9},
+        {from: 5, to: 10},
+        {from: 5, to: 12},
+        {from: 6, to: 1},
+        {from: 6, to: 3},
+        {from: 6, to: 4},
+        {from: 6, to: 5},
+        {from: 7, to: 8},
+        {from: 7, to: 11}
+
+
+    ]);
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+
+    // provide the data in the vis format
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {};
+
+    // initialize your network!
+    var network = new vis.Network(container, data, options);
+     network.on("selectNode", function (params) {
+        if (params.nodes.length === 1) {
+            var node = nodes.get(params.nodes[0]);
+            window.open(node.url, '_blank');
+        }
+         });
+</script>
+    </body>
+    </html>

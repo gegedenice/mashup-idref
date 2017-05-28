@@ -1,0 +1,162 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.19.1/vis.min.css">
+     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/theme.css" type="text/css">
+  </head>
+<body class="bg-inverse">
+   <div class="py-5  section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h3 class="text-primary bg-faded">Damon Mayaffre</h3>
+                <p class="lead">Laboratoire Bases Corpus et Langage (BCL/CNRS UMR7320)
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="py-5  section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <iframe style=" width: 1200px;height: 400px;" src="graphe-id.html"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="py-5 section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <ul class="list-group">
+                        <p>Publications dans Hal <span id="nbHal" class="label label-warning pull-right"></span></p>
+                        <div id="results-hal-box"></div>
+                    </ul>
+                </div>
+                <div class="col-md-8">
+                    <div id="visualization"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-5 section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <ul class="list-group">
+                        <p>Documents dans le Sudoc</p>
+                        <div id="results-sudoc-box"></div>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <ul class="list-group">
+                        <p>Documents dans data.bnf</p>
+                        <div id="results-bnf-box"></div>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <ul class="list-group">
+                        <p>Documents dans Isidore <span id="nbIsidore" class="label label-warning pull-right"></span></p>
+                        <div id="results-isidore-box"></div>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+        <script>
+$(document).ready(function() {
+    //Appel Ajax Hal
+    var arr = [];
+    var hal = 'https://api.archives-ouvertes.fr/search/?wt=json&q=authIdHal_s:damon-mayaffre&fl=*_s';
+    $('#hal').val('');
+    $.ajax({
+        url: hal,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            var result = data;
+            $('#nbHal').append(result.response.numFound);
+            for (var i = 0; i <= result.response.numFound; i++) {
+                if (typeof result.response.docs[i] !== 'undefined') {
+                    var title = result.response.docs[i].title_s;
+                    title = title.toString();
+                    title = title.replace('"', '');
+                    arr.push({
+                        id: i,
+                        content: title,
+                        start: result.response.docs[i].producedDate_s.substring(0, 4)
+                    });
+                    $('#results-hal-box').append('<li class="list-group-item"><a href="#numHal' + i + '" data-parent="#results-hal-box" data-toggle="collapse">' + result.response.docs[i].title_s + '</a><div id="numHal' + i + '" class="panel-collapse collapse"><div class="panel-body"><ul class="list-group"><li class="list-group-item list-group-item-info">Auteurs : ' + result.response.docs[i].authFullName_s + '</li><li class="list-group-item list-group-item-info">Date : ' + result.response.docs[i].producedDate_s + '</li><li class="list-group-item list-group-item-info">Keywords : ' + result.response.docs[i].fr_keyword_s + '</li><li class="list-group-item list-group-item-info">Type de doc : ' + result.response.docs[i].docType_s + '</li><li class="list-group-item list-group-item-info">Type de donnees : ' + result.response.docs[i].submitType_s + '</li><li class="list-group-item list-group-item-info">url : <a href="' + result.response.docs[i].uri_s + '" target="_blanck">' + result.response.docs[i].uri_s + '</a></li><li class="list-group-item list-group-item-info">Acces au fichier : ' + result.response.docs[i].fileMain_s + '</li><li class="list-group-item list-group-item-info">Couleur SherpaRomeo <button type="button" class="btn btn-default">' + result.response.docs[i].journalSherpaColor_s + '</button></li><li class="list-group-item list-group-item-info">DOI : ' + result.response.docs[i].doiId_s + '</li>');
+                    $('#results-hal-box').append('</ul></div></div></li>');
+                }
+            }
+            var liste = new String(arr);
+            liste.x = arr;
+            var container = document.getElementById('visualization');
+            var items = new vis.DataSet(liste.x);
+            var options = {
+                width: '100%',
+                height: '500px'
+            };
+            var timeline = new vis.Timeline(container, items, options);
+        }
+    });
+
+   //Appel Ajax Idref
+   var idref = 'http://www.idref.fr/services/biblio/052724301.xml';
+   $.ajax({
+       url: idref,
+       type: 'GET',
+       dataType: 'xml',
+       success: function(xml) {
+           $(xml).find('role').each(function() {
+               var role = $(this).find('roleName').text();
+               var unimarcRole = $(this).find('unimarcCode').text();
+               var count = $(this).find('count').text();
+               $('#results-sudoc-box').append('<li class="list-group-item"><a href="#num' + unimarcRole + '" data-parent="#results-sudoc-box" data-toggle="collapse">' + role + ' <span class="label label-warning pull-right">' + count + '</span></a><div id="num' + unimarcRole + '" class="panel-collapse collapse"><div class="panel-body"><ul class="list-group">');
+               $(xml).find('doc').each(function() {
+                   var citation = $(this).find('citation').text();
+                   var ppn = $(this).find('ppn').text();
+                   $('#results-sudoc-box').append('<li class="list-group-item list-group-item-info"><a href="http://www.sudoc.fr/' + ppn + '" target="_blanck">' + citation + '</a></li>');
+               });
+               $('#results-sudoc-box').append('</ul></div></div></li>');
+           });
+       }
+   });
+
+    //Appel Ajax Sparql data.bnf
+    $.getJSON("http://data.bnf.fr/sparql?default-graph-uri=&query=PREFIX+rdarelationships%3A+%3Chttp%3A%2F%2Frdvocab.info%2FRDARelationshipsWEMI%2F%3E%0D%0Aselect+distinct%28%3Fz%29+%3Ftitle+%3Fdate+where+%7B%3Fy+%3Fp+%3Chttp%3A%2F%2Fdata.bnf.fr%2Fark%3A%2F12148%2Fcb13626827q%23about%3E.%0D%0A%3Fz+rdarelationships%3AexpressionManifested+%3Fy.%0D%0A%3Fz+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Ftitle%3E+%3Ftitle.%0D%0A++%3Fz+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate%3E+%3Fdate%7D&format=application%2Fsparql-results%2Bjson&timeout=0&should-sponge=&debug=on",
+     function(data) {
+         result = data;
+         for (var i = 0; i <= result.results.bindings.length; i++) {
+             $('#results-bnf-box').append('<li class="list-group-item"><a href="#numBnf' + i + '" data-parent="#results-bnf-box" data-toggle="collapse">' + result.results.bindings[i].title.value + '</a><div id="numBnf' + i + '" class="panel-collapse collapse"><div class="panel-body"><ul class="list-group"><li class="list-group-item list-group-item-info">Date : ' + result.results.bindings[i].date.value + '</li><li class="list-group-item list-group-item-info">uri : <a href="' + result.results.bindings[i].z.value + '" target="_blanck">' + result.results.bindings[i].z.value + '</a></li>');
+             $('#results-bnf-box').append('</ul></div></div></li>');
+         }
+     });      
+
+//Appel Ajax API Isidore
+var isidore = 'https://api.rechercheisidore.fr/resource/search?author=http://www.idref.fr/052724301&replies=200&output=json';
+$.getJSON(isidore,
+    function(data) {
+        result = data;
+        $('#nbIsidore').append(result.response.replies.meta.items);
+        for (var i = 0; i <= 30; i++) {
+            if (typeof result.response.replies.content.reply[i].isidore.title !== 'object') {
+                $('#results-isidore-box').append('<li class="list-group-item">' + result.response.replies.content.reply[i].isidore.title + '</li>');
+            } else {
+                $('#results-isidore-box').append('<li class="list-group-item"><a href="#numIsidore' + i + '" data-parent="#results-isidore-box" data-toggle="collapse">' + result.response.replies.content.reply[i].isidore.title._value + '</a><div id="numIsidore' + i + '" class="panel-collapse collapse"><div class="panel-body"><ul class="list-group"><li class="list-group-item list-group-item-info">>Date : ' + result.response.replies.content.reply[i].isidore.date.origin + '</li><li class="list-group-item list-group-item-info">Source : ' + result.response.replies.content.reply[i].isidore.ore.similar + '</li><li class="list-group-item list-group-item-info">Type de doc : ' + result.response.replies.content.reply[i].isidore.types.type + '</li>');
+            }
+            $('#results-isidore-box').append('</ul></div></div></li>');
+        }
+    });
+  }); 
+</script>
+</body>
+</html>
