@@ -1,0 +1,154 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+     </head>
+     <body>
+    <div class="container-fluid">
+    <h3>Exemples d'interrogation par APi pour afficher les publications d'un auteur</h3>
+    <div class="row">
+        <div class="col-lg-4">
+            <div id="results-hal-box" class="list-group-item"><a href="#hal" data-parent="#results-hal-box" data-toggle="collapse">API Hal</a>
+                <div id="hal" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <ul class="list-group"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="col-lg-4">
+            <div id="results-sudoc-box" class="list-group-item"><a href="#sudoc" data-parent="#results-sudoc-box" data-toggle="collapse">Web service biblio Idref</a>
+                <div id="sudoc" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <ul class="list-group"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="col-lg-4">
+            <div id="results-bnf-box" class="list-group-item"><a href="#bnf" data-parent="#results-bnf-box" data-toggle="collapse">Sparql Endpoint data.bnf</a>
+                <div id="bnf" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <ul class="list-group"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ <div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-4">
+            <div id="results-isidore-box" class="list-group-item"><a href="#isidore" data-parent="#results-isidore-box" data-toggle="collapse">API Isidore</a>
+                <div id="isidore" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <ul class="list-group"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div id="results-arxiv-box" class="list-group-item"><a href="#arxiv" data-parent="#results-arxiv-box" data-toggle="collapse">API Arxiv</a>
+                <div id="arxiv" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <ul class="list-group"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+<script>
+//Appel Ajax API Hal
+$("#results-hal-box").click(function() {
+	var idHal = "jocelyne-streiff-fenart"; //mettre ici votre IdHal
+    var hal = 'https://api.archives-ouvertes.fr/search/?wt=json&q=authIdHal_s:'+idHal+'&fl=*_s';
+    $('#hal').val('');
+    $.ajax({
+        url: hal,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            result = data;
+            for (var i = 0; i <= result.response.numFound; i++) {
+                $('#hal').append('<li class="list-group-item list-group-item-info">' + result.response.docs[i].title_s + '</li>');
+            }
+        }
+    });
+});
+
+//Appel Ajax API Idref
+$("#results-sudoc-box").click(function() {
+	var ppn = "029828783" //mette ici votre ppn Idref
+    var idref = 'http://www.idref.fr/services/biblio/'+ppn+'.xml';
+    $.ajax({
+        url: idref,
+        type: 'GET',
+        dataType: 'xml',
+        success: function(xml) {
+            $(xml).find('doc').each(function() {
+                var citation = $(this).find('citation').text();
+                $('#sudoc').append('<li class="list-group-item list-group-item-info">' + citation + '</li>');
+            });
+        }
+    });
+});
+
+//Appel Ajax Sparql Endpoint data.bnf comme une api
+$("#results-bnf-box").click(function() {
+    $.getJSON("http://data.bnf.fr/sparql?default-graph-uri=&query=PREFIX+rdarelationships%3A+%3Chttp%3A%2F%2Frdvocab.info%2FRDARelationshipsWEMI%2F%3E%0D%0Aselect+distinct%28%3Fz%29+%3Ftitle+%3Fdate+where+%7B%3Fy+%3Fp+%3Chttp%3A%2F%2Fdata.bnf.fr%2Fark%3A%2F12148%2Fcb12137299c%23about%3E.%0D%0A%3Fz+rdarelationships%3AexpressionManifested+%3Fy.%0D%0A%3Fz+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Ftitle%3E+%3Ftitle.%0D%0A++%3Fz+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fdate%3E+%3Fdate%7D&format=application%2Fsparql-results%2Bjson&timeout=0&should-sponge=&debug=on",
+        function(data) {
+            result = data;
+            for (var i = 0; i <= result.results.bindings.length; i++) {
+                $('#bnf').append('<li class="list-group-item list-group-item-info">' + result.results.bindings[i].title.value + '</li>');
+            }
+        });
+});
+
+//Appel Ajax API Isidore
+$("#results-isidore-box").click(function() {
+	var auteur = "http://www.idref.fr/029828783"; //mettre ici votre uri Idref
+    var isidore = 'https://api.rechercheisidore.fr/resource/search?author='+auteur+'&replies=30&output=json';
+    $.getJSON(isidore,
+        function(data) {
+            result = data;
+            for (var i = 0; i <= 30; i++) {
+                if (typeof result.response.replies.content.reply[i].isidore.title !== 'object') {
+                    $('#isidore').append('<li class="list-group-item list-group-item-info">' + result.response.replies.content.reply[i].isidore.title + '</li>');
+                } else {
+                    $('#isidore').append('<li class="list-group-item list-group-item-info">' + result.response.replies.content.reply[i].isidore.title._value + '</li>');
+                }
+            }
+        });
+
+}); 
+
+//Appel Ajax API Arxiv
+$("#results-arxiv-box").click(function() {
+	var idArxiv = "musacchio" ; //mettre ici votre Id Arxiv
+    var arxiv = 'http://export.arxiv.org/api/query?search_query=all:'+idArxiv+'&start=0';
+    $.ajax({
+        url: arxiv,
+        type: 'GET',
+        dataType: 'xml',
+        success: function(xml) {
+            $(xml).find('entry').each(function() {
+                var title = $(this).find('title').text();
+                var doi = $(this).find('arxiv\\:doi').text();
+                $('#arxiv').append('<li class="list-group-item list-group-item-info">' + title + ' / doi : ' + doi + '</li>');
+/*
+$(this).find('author').each(function(){
+var author = $(this).find('name').text();
+$('#results-arxiv-box').append('<p">Auteurs : '+author+'</p>');
+                                       });*/
+
+            });
+        }
+    });
+});
+</script>
+     </body>
+     </html>
